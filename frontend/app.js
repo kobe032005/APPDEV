@@ -48,10 +48,6 @@ async function load() { try { const response = await fetch(api); if (!response.o
 async function save(event) { event.preventDefault(); const payload = { studentId: $('student-id').value.trim(), name: $('name').value.trim(), email: $('email').value.trim(), phone: $('phone').value.trim(), course: $('course').value.trim(), courseCode: $('course-code').value.trim(), yearLevel: $('year-level').value, section: $('section').value.trim(), enrollmentDate: $('enrollment-date').value, status: $('status').value, address: $('address').value.trim() }; const id = $('record-id').value; try { const response = await fetch(id ? `${api}/${id}` : api, { method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(id ? { id: Number(id), ...payload } : payload) }); if (!response.ok) throw new Error(await response.text()); $('form-panel').classList.add('hidden'); await load(); } catch (error) { setMessage(error.message || 'Unable to save student.', true); } }
 form.addEventListener('submit', save);
 $('add-button').addEventListener('click', () => showForm());
-$('sidebar-add-button').addEventListener('click', () => {
-  showForm();
-  $('form-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
-});
 $('close-button').addEventListener('click', () => $('form-panel').classList.add('hidden'));
 $('cancel-button').addEventListener('click', () => $('form-panel').classList.add('hidden'));
 $('search').addEventListener('input', render);
