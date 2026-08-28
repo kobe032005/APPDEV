@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using StudentDirectory.Api;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,8 +13,10 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 app.UseCors();
-app.UseDefaultFiles();
-app.UseStaticFiles();
+var frontendPath = Path.GetFullPath(Path.Combine(app.Environment.ContentRootPath, "..", "..", "frontend"));
+var frontendProvider = new PhysicalFileProvider(frontendPath);
+app.UseDefaultFiles(new DefaultFilesOptions { FileProvider = frontendProvider });
+app.UseStaticFiles(new StaticFileOptions { FileProvider = frontendProvider });
 app.UseSwagger();
 app.UseSwaggerUI();
 
