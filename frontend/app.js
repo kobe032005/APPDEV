@@ -21,7 +21,6 @@ function filteredStudents() {
 function render() {
   $('total').textContent = students.length;
   $('active').textContent = students.filter((student) => student.status === 'Active').length;
-  $('leave').textContent = students.filter((student) => student.status === 'On Leave').length;
   $('graduated').textContent = students.filter((student) => student.status === 'Graduated').length;
   const visible = filteredStudents();
   $('record-count').textContent = `${visible.length} ${visible.length === 1 ? 'student' : 'students'}`;
@@ -30,7 +29,7 @@ function render() {
     <td>${escapeHtml(student.course)}<small>${escapeHtml(student.studentId)}</small></td>
     <td>${escapeHtml(student.yearLevel)} / ${escapeHtml(student.section)}</td>
     <td><span class="status ${student.status.toLowerCase().replaceAll(' ', '-')}">${escapeHtml(student.status)}</span></td>
-    <td><button class="edit" data-edit="${student.id}">Edit</button><button class="delete" data-delete="${student.id}">Delete</button></td></tr>`).join('') : '<tr><td class="empty" colspan="5">No students found. Add a student to begin.</td></tr>';
+    <td><button class="edit" data-edit="${student.id}">Edit</button><button class="delete" data-delete="${student.id}">Delete</button></td></tr>`).join('') : '<tr><td class="empty" colspan="5">No students found. Add students to begin.</td></tr>';
 }
 
 function escapeHtml(value) { return String(value ?? '').replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;' })[character]); }
