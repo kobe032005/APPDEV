@@ -16,8 +16,7 @@ public static class MauiProgram
 			});
 
 		builder.Services.AddMauiBlazorWebView();
-		var apiUrl = DeviceInfo.Platform == DevicePlatform.Android ? "http://10.0.2.2:5000/" : "http://localhost:5000/";
-		builder.Services.AddSingleton(new HttpClient { BaseAddress = new Uri(apiUrl) });
+		builder.Services.AddSingleton(new HttpClient { BaseAddress = new Uri("http://localhost:5000/") });
 		builder.Services.AddSingleton<StudentApiClient>();
 
 #if DEBUG
