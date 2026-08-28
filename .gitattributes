@@ -1,0 +1,9 @@
+# Keep the original browser prototype available without counting it as the active app.
+/index.html linguist-vendored
+/styles.css linguist-vendored
+/script.js linguist-vendored
+
+# Exclude generated and local-only content from language statistics.
+**/bin/** linguist-generated
+**/obj/** linguist-generated
+*.db linguist-generated

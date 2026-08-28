@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'studentRecords';
+const API_URL = 'http://localhost:5000/api/students';
 
 const form = document.getElementById('record-form');
 const recordIdInput = document.getElementById('record-id');
@@ -22,6 +22,20 @@ const searchInput = document.getElementById('student-search');
 const statusFilter = document.getElementById('status-filter');
 const studentCount = document.getElementById('student-count');
 const visibleCount = document.getElementById('visible-count');
+const totalStat = document.getElementById('total-stat');
+const activeStat = document.getElementById('active-stat');
+const leaveStat = document.getElementById('leave-stat');
+const graduatedStat = document.getElementById('graduated-stat');
+const activePercent = document.getElementById('active-percent');
+const leavePercent = document.getElementById('leave-percent');
+const graduatedPercent = document.getElementById('graduated-percent');
+const activeBar = document.getElementById('active-bar');
+const leaveBar = document.getElementById('leave-bar');
+const graduatedBar = document.getElementById('graduated-bar');
+const courseSummary = document.getElementById('course-summary');
+const dashboardVisible = document.getElementById('dashboard-visible');
+const latestEnrollment = document.getElementById('latest-enrollment');
+const completionRate = document.getElementById('completion-rate');
 const formPanel = document.getElementById('student-form-panel');
 const toggleFormButton = document.getElementById('toggle-form-button');
 const closeFormButton = document.getElementById('close-form-button');
@@ -33,17 +47,11 @@ const studentsNavButton = document.querySelector('.nav-item');
 
 let records = [];
 
-function getRecordsFromStorage() {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch (error) {
-    console.error('Error reading storage:', error);
-    return [];
-  }
-}
-function saveRecordsToStorage() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+async function loadRecords() {
+  const response = await fetch(API_URL);
+  if (!response.ok) throw new Error('Unable to load students from the API.');
+  records = await response.json();
+  renderRecords();
 }
 
 function showMessage(text, type = 'success') {
@@ -141,6 +149,29 @@ function renderRecords() {
     return matchesSearch && (selectedStatus === 'All' || record.status === selectedStatus);
   });
   studentCount.textContent = records.length;
+  totalStat.textContent = records.length;
+  activeStat.textContent = records.filter((record) => record.status === 'Active').length;
+  leaveStat.textContent = records.filter((record) => record.status === 'On Leave').length;
+  graduatedStat.textContent = records.filter((record) => record.status === 'Graduated').length;
+  const total = records.length || 1;
+  const statusCounts = {
+    active: records.filter((record) => record.status === 'Active').length,
+    leave: records.filter((record) => record.status === 'On Leave').length,
+    graduated: records.filter((record) => record.status === 'Graduated').length,
+  };
+  const percentages = Object.fromEntries(Object.entries(statusCounts).map(([key, value]) => [key, Math.round((value / total) * 100)]));
+  activePercent.textContent = `${percentages.active}%`;
+  leavePercent.textContent = `${percentages.leave}%`;
+  graduatedPercent.textContent = `${percentages.graduated}%`;
+  activeBar.style.width = `${percentages.active}%`;
+  leaveBar.style.width = `${percentages.leave}%`;
+  graduatedBar.style.width = `${percentages.graduated}%`;
+  dashboardVisible.textContent = visibleRecords.length;
+  completionRate.textContent = `${percentages.graduated}%`;
+  const latest = [...records].sort((a, b) => String(b.enrollmentDate).localeCompare(String(a.enrollmentDate)))[0];
+  latestEnrollment.textContent = latest?.enrollmentDate || 'None';
+  const courses = Object.entries(records.reduce((summary, record) => ({ ...summary, [record.course]: (summary[record.course] || 0) + 1 }), {})).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  courseSummary.innerHTML = courses.length ? courses.map(([course, count]) => `<div class="course-row"><span>${course}</span><strong>${count}</strong></div>`).join('') : '<p class="empty-insight">Add students to see course distribution.</p>';
   visibleCount.textContent = `${visibleRecords.length} ${visibleRecords.length === 1 ? 'student' : 'students'}`;
 
   if (visibleRecords.length === 0) {
@@ -182,27 +213,25 @@ function validateForm() {
   return true;
 }
 
-function createRecord(recordData) {
-  records.push(recordData);
-  saveRecordsToStorage();
-  renderRecords();
+async function createRecord(recordData) {
+  const response = await fetch(API_URL, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(recordData),
+  });
+  if (!response.ok) throw new Error(await response.text());
+  await loadRecords();
   showMessage('Student added successfully.');
 }
 
-function updateRecord(recordId, recordData) {
-  const index = records.findIndex((record) => record.id === recordId);
-  if (index === -1) {
-    showMessage('Record not found.', 'error');
-    return;
-  }
-
-  records[index] = { ...records[index], ...recordData };
-  saveRecordsToStorage();
-  renderRecords();
+async function updateRecord(recordId, recordData) {
+  const response = await fetch(`${API_URL}/${recordId}`, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: Number(recordId), ...recordData }),
+  });
+  if (!response.ok) throw new Error(await response.text());
+  await loadRecords();
   showMessage('Student updated successfully.');
 }
 
-function deleteRecord(recordId) {
+async function deleteRecord(recordId) {
   const record = records.find((item) => item.id === recordId);
   if (!record) {
     showMessage('Record not found.', 'error');
@@ -214,9 +243,12 @@ function deleteRecord(recordId) {
     return;
   }
 
-  records = records.filter((item) => item.id !== recordId);
-  saveRecordsToStorage();
-  renderRecords();
+  const response = await fetch(`${API_URL}/${recordId}`, { method: 'DELETE' });
+  if (!response.ok) {
+    showMessage('Unable to delete record.', 'error');
+    return;
+  }
+  await loadRecords();
   showMessage('Student deleted successfully.');
   if (recordIdInput.value === recordId) {
     resetForm();
@@ -256,7 +288,7 @@ function fillFormForEdit(recordId) {
   showMessage('You are editing an existing student.');
 }
 
-function handleSubmit(event) {
+async function handleSubmit(event) {
   event.preventDefault();
   if (!validateForm()) {
     return;
@@ -277,18 +309,19 @@ function handleSubmit(event) {
   };
 
   const existingId = recordIdInput.value;
-  if (existingId) {
-    updateRecord(existingId, recordData);
-  } else {
-    createRecord({ id: Date.now().toString(), ...recordData });
+  try {
+    if (existingId) await updateRecord(existingId, recordData);
+    else await createRecord(recordData);
+  } catch (error) {
+    showMessage(error.message, 'error');
+    return;
   }
 
   resetForm();
 }
 
 function init() {
-  records = getRecordsFromStorage();
-  renderRecords();
+  loadRecords().catch((error) => showMessage(error.message, 'error'));
   form.addEventListener('submit', handleSubmit);
   cancelButton.addEventListener('click', resetForm);
   cancelButton.addEventListener('click', hideForm);
