@@ -1,0 +1,26 @@
+﻿@page "/"
+@inject StudentApiClient Api
+
+<PageTitle>Student Directory</PageTitle>
+<main class="dashboard">
+	<header><div><p class="eyebrow">College administration</p><h1>Student directory</h1></div><button class="primary" @onclick="OpenNew">+ Add student</button></header>
+	<section class="stats"><div><span>Total students</span><strong>@Students.Count</strong></div><div><span>Active</span><strong>@Students.Count(student => student.Status == "Active")</strong></div><div><span>Graduated</span><strong>@Students.Count(student => student.Status == "Graduated")</strong></div></section>
+	@if (Editing is not null)
+	{
+		<EditForm Model="Editing" OnValidSubmit="Save" class="form-panel"><h2>@(Editing.Id == 0 ? "Add student" : "Edit student")</h2><div class="form-grid"><InputText @bind-Value="Editing.StudentId" placeholder="Student ID" /><InputText @bind-Value="Editing.Name" placeholder="Full name" /><InputText @bind-Value="Editing.Email" placeholder="Email address" /><InputText @bind-Value="Editing.Course" placeholder="Course" /><InputText @bind-Value="Editing.YearLevel" placeholder="Year level" /><InputText @bind-Value="Editing.Section" placeholder="Section" /><InputSelect @bind-Value="Editing.Status"><option>Active</option><option>On Leave</option><option>Graduated</option><option>Inactive</option></InputSelect><InputDate @bind-Value="Editing.EnrollmentDate" /></div><button class="primary" type="submit">Save</button> <button type="button" @onclick="Close">Cancel</button></EditForm>
+	}
+	<section class="panel"><div class="panel-heading"><h2>All students</h2><button @onclick="Load">Refresh</button></div>@if (Error is not null) { <p class="error">@Error</p> } else { @foreach (var student in Students) { <article><div><strong>@student.Name</strong><small>@student.StudentId · @student.Course · @student.YearLevel / @student.Section</small></div><span class="status">@student.Status</span><button @onclick="() => OpenEdit(student)">Edit</button><button class="danger" @onclick="() => Remove(student)">Delete</button></article> } }</section>
+</main>
+
+@code {
+	private List<Student> Students = [];
+	private Student? Editing;
+	private string? Error;
+	protected override async Task OnInitializedAsync() => await Load();
+	private async Task Load() { try { Error = null; Students = await Api.GetAllAsync(); } catch (HttpRequestException) { Error = "Start the backend first, then refresh."; } }
+	private void OpenNew() => Editing = new Student();
+	private void OpenEdit(Student student) => Editing = new Student { Id = student.Id, StudentId = student.StudentId, Name = student.Name, Email = student.Email, Course = student.Course, YearLevel = student.YearLevel, Section = student.Section, Status = student.Status, EnrollmentDate = student.EnrollmentDate };
+	private void Close() => Editing = null;
+	private async Task Save() { await Api.SaveAsync(Editing!); Editing = null; await Load(); }
+	private async Task Remove(Student student) { await Api.DeleteAsync(student.Id); await Load(); }
+}

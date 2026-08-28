@@ -1,39 +1,42 @@
-# Student Records System
+# Student Directory
 
-This repository contains a student records system with an ASP.NET Core Web API backend and a C# Blazor WebAssembly dashboard. The backend persists records in a local SQLite database through Entity Framework Core and exposes Swagger/OpenAPI documentation.
+A C# student CRUD application built with ASP.NET Core Web API, Entity Framework Core, SQLite, Swagger/OpenAPI, and .NET MAUI Blazor Hybrid for Windows.
 
-## Features
-- Add students with a unique student ID, full name, email, phone, course name, course code, year level, section, enrollment date, status, and address.
-- Read and display students in a directory table.
-- Update existing students using the edit button.
-- Delete students with confirmation.
-- Input validation prevents incomplete fields and duplicate student IDs.
-- Student records persist in SQLite through Entity Framework Core.
-- REST endpoints are available under `/api/students`.
-- Swagger UI is available at `/swagger` while the API is running.
+## Project Structure
 
-## Files
-- `frontend/StudentRecords.Web`: C# Blazor WebAssembly dashboard, typed API client, and UI styling.
-- `index.html`, `styles.css`, `script.js`: Original static prototype retained for reference.
-- `backend/StudentRecords.Api`: ASP.NET Core Web API, EF Core DbContext, SQLite database, and Swagger.
-- `mobile/StudentRecords.Mobile`: .NET MAUI client location, created after installing the MAUI workload.
+- `backend/StudentDirectory.Api` - ASP.NET Core backend API
+- `mobile/StudentDirectory.App` - .NET MAUI Windows desktop app
+- `StudentDirectory.sln` - solution file
+- `start.cmd` - opens the backend and desktop app
+- `setup-windows.cmd` - setup for another Windows PC
+- `publish-windows.cmd` - creates a click-to-run Windows publish folder
+- `create-shortcuts.cmd` - creates Desktop and Start Menu shortcuts
+- `run-backend.cmd` - starts only the backend
+- `run-app.cmd` - starts only the desktop app
 
-## Running
-Run the API from PowerShell:
+## Technologies
 
-```powershell
-& 'C:\Program Files\dotnet\dotnet.exe' run --project .\backend\StudentRecords.Api
-```
+- ASP.NET Core Web API
+- Entity Framework Core with SQLite
+- Swagger / OpenAPI
+- .NET MAUI Blazor Hybrid
+- C#
+- Git
 
-Open `http://localhost:5000/swagger` to inspect and test the API. The SQLite file is created as `students.db` in the API process directory.
+## Requirements
 
-Run the C# dashboard in a second terminal:
+Install on another Windows PC:
 
-```powershell
-& 'C:\Program Files\dotnet\dotnet.exe' run --project .\frontend\StudentRecords.Web
-```
+- .NET 8 SDK x64, only needed to build from source
+- Git
+- Windows App SDK support through the .NET MAUI workload
 
-The Blazor dashboard expects the API at `http://localhost:5000`.
+## Run
 
-## Notes
-The API is the source of truth for student records. The solution uses C# for the backend and dashboard; the MAUI client can share the same typed API model when the MAUI workload is available.
+Run `setup-windows.cmd` once on a new computer. Then run `start.cmd`.
+
+The API is available at `http://localhost:5000` and Swagger is at `http://localhost:5000/swagger`.
+
+To publish the desktop app, run `publish-windows.cmd`. To create shortcuts, run `create-shortcuts.cmd`.
+
+Student records are stored in the API's local `students.db` SQLite database.
