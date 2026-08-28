@@ -21,6 +21,7 @@ function filteredStudents() {
 function render() {
   $('total').textContent = students.length;
   $('active').textContent = students.filter((student) => student.status === 'Active').length;
+  $('leave').textContent = students.filter((student) => student.status === 'On Leave').length;
   $('graduated').textContent = students.filter((student) => student.status === 'Graduated').length;
   const visible = filteredStudents();
   $('record-count').textContent = `${visible.length} ${visible.length === 1 ? 'student' : 'students'}`;
@@ -29,7 +30,7 @@ function render() {
     <td>${escapeHtml(student.course)}<small>${escapeHtml(student.studentId)}</small></td>
     <td>${escapeHtml(student.yearLevel)} / ${escapeHtml(student.section)}</td>
     <td><span class="status ${student.status.toLowerCase().replaceAll(' ', '-')}">${escapeHtml(student.status)}</span></td>
-    <td><button class="edit" data-edit="${student.id}">Edit</button><button class="delete" data-delete="${student.id}">Delete</button></td></tr>`).join('') : '<tr><td class="empty" colspan="5">No students found. Add students to begin.</td></tr>';
+    <td><button class="edit" data-edit="${student.id}">Edit</button><button class="delete" data-delete="${student.id}">Delete</button></td></tr>`).join('') : '<tr><td class="empty" colspan="5">No students found. Add a student to begin.</td></tr>';
 }
 
 function escapeHtml(value) { return String(value ?? '').replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;' })[character]); }
@@ -47,6 +48,10 @@ async function load() { try { const response = await fetch(api); if (!response.o
 async function save(event) { event.preventDefault(); const payload = { studentId: $('student-id').value.trim(), name: $('name').value.trim(), email: $('email').value.trim(), phone: $('phone').value.trim(), course: $('course').value.trim(), courseCode: $('course-code').value.trim(), yearLevel: $('year-level').value, section: $('section').value.trim(), enrollmentDate: $('enrollment-date').value, status: $('status').value, address: $('address').value.trim() }; const id = $('record-id').value; try { const response = await fetch(id ? `${api}/${id}` : api, { method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(id ? { id: Number(id), ...payload } : payload) }); if (!response.ok) throw new Error(await response.text()); $('form-panel').classList.add('hidden'); await load(); } catch (error) { setMessage(error.message || 'Unable to save student.', true); } }
 form.addEventListener('submit', save);
 $('add-button').addEventListener('click', () => showForm());
+$('sidebar-add-button').addEventListener('click', () => {
+  showForm();
+  $('form-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
 $('close-button').addEventListener('click', () => $('form-panel').classList.add('hidden'));
 $('cancel-button').addEventListener('click', () => $('form-panel').classList.add('hidden'));
 $('search').addEventListener('input', render);
