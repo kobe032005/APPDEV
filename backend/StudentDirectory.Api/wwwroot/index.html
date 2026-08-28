@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Directory</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">S</span><span>Student<br>Directory</span></div>
+      <nav><a class="active" href="#directory">Directory</a><a href="#overview">Overview</a><a href="/swagger" target="_blank">API Docs</a></nav>
+      <p class="sidebar-note">Local campus records<br>localhost:5000</p>
+    </aside>
+    <main class="content" id="directory">
+      <header class="page-header"><div><p class="eyebrow">College administration</p><h1>Student directory</h1><p class="subhead">Manage student records from one simple workspace.</p></div><button class="primary" id="add-button">+ Add a student</button></header>
+      <section class="stats" id="overview" aria-label="Student overview"><article><span>Total students</span><strong id="total">0</strong><small>All records</small></article><article><span>Active</span><strong id="active">0</strong><small>Currently enrolled</small></article><article><span>On leave</span><strong id="leave">0</strong><small>Needs follow-up</small></article><article><span>Graduated</span><strong id="graduated">0</strong><small>Completed studies</small></article></section>
+      <section class="toolbar"><label class="search"><span>Search</span><input id="search" type="search" placeholder="Search by name, ID, email, or course"></label><label class="filter"><span>Status</span><select id="filter"><option>All</option><option>Active</option><option>On Leave</option><option>Graduated</option><option>Inactive</option></select></label></section>
+      <section class="panel form-panel hidden" id="form-panel"><div class="panel-heading"><div><p class="eyebrow">Student profile</p><h2 id="form-title">Add student</h2></div><button class="close" id="close-button" aria-label="Close form">&times;</button></div><form id="student-form"><input type="hidden" id="record-id"><fieldset><legend>1. Student profile</legend><div class="form-grid"><label>Student ID<input id="student-id" required placeholder="STU-2026-001"></label><label>Full name<input id="name" required placeholder="Enter full name"></label><label>Email address<input id="email" type="email" required placeholder="student@example.com"></label><label>Phone number<input id="phone" required placeholder="555-0100"></label></div></fieldset><fieldset><legend>2. Academic details</legend><div class="form-grid"><label>Course<input id="course" required placeholder="BSCS"></label><label>Course code<input id="course-code" required placeholder="CS101"></label><label>Year level<select id="year-level" required><option value="">Select year</option><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option><option>Graduate</option></select></label><label>Section<input id="section" required placeholder="A"></label></div></fieldset><fieldset><legend>3. Enrollment</legend><div class="form-grid"><label>Enrollment date<input id="enrollment-date" type="date" required></label><label>Status<select id="status"><option>Active</option><option>On Leave</option><option>Graduated</option><option>Inactive</option></select></label><label class="wide">Address<input id="address" required placeholder="Enter student's address"></label></div></fieldset><div class="form-actions"><button class="primary" type="submit">Save student</button><button type="button" id="cancel-button">Cancel</button></div><p class="message" id="message"></p></form></section>
+      <section class="panel"><div class="panel-heading"><div><p class="eyebrow">All enrolled learners</p><h2>Student records</h2></div><span class="record-count" id="record-count">0 students</span></div><div class="table-wrap"><table><thead><tr><th>Student</th><th>Course</th><th>Year / section</th><th>Status</th><th>Actions</th></tr></thead><tbody id="records"></tbody></table></div></section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

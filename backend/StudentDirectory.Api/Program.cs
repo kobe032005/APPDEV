@@ -2,8 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using StudentDirectory.Api;
 
 var builder = WebApplication.CreateBuilder(args);
+var databasePath = Path.Combine(builder.Environment.ContentRootPath, "students.db");
 builder.Services.AddDbContext<StudentDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("StudentDatabase") ?? "Data Source=students.db"));
+    options.UseSqlite(builder.Configuration.GetConnectionString("StudentDatabase") ?? $"Data Source={databasePath}"));
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
     policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 builder.Services.AddEndpointsApiExplorer();
@@ -11,6 +12,8 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 app.UseCors();
+app.UseDefaultFiles();
+app.UseStaticFiles();
 app.UseSwagger();
 app.UseSwaggerUI();
 
@@ -22,6 +25,11 @@ using (var scope = app.Services.CreateScope())
 var students = app.MapGroup("/api/students").WithTags("Students");
 students.MapGet("/", async (StudentDbContext db, CancellationToken token) =>
     await db.Students.AsNoTracking().OrderBy(student => student.Name).ToListAsync(token));
+students.MapGet("/{id:int}", async (int id, StudentDbContext db, CancellationToken token) =>
+{
+    var student = await db.Students.AsNoTracking().FirstOrDefaultAsync(item => item.Id == id, token);
+    return student is null ? Results.NotFound() : Results.Ok(student);
+});
 students.MapPost("/", async (Student student, StudentDbContext db, CancellationToken token) =>
 {
     if (await db.Students.AnyAsync(item => item.StudentId == student.StudentId, token))

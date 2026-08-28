@@ -6,9 +6,12 @@ public sealed class Student
     public required string StudentId { get; set; }
     public required string Name { get; set; }
     public required string Email { get; set; }
+    public required string Phone { get; set; }
     public required string Course { get; set; }
+    public required string CourseCode { get; set; }
     public required string YearLevel { get; set; }
     public required string Section { get; set; }
     public required string Status { get; set; }
+    public required string Address { get; set; }
     public DateOnly EnrollmentDate { get; set; }
 }
